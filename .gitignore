@@ -1,10 +1,9 @@
-
-*.rtf
+# Python files
 
 *.pyc
-
 *.pkl
 
+# Other files
+*.rtf
 *.pdf
-
 *.txt
