@@ -2,8 +2,7 @@
 
 This is some code accompanying the paper:
 
-A regularity structure for finance.
-Bayer, Friz, Gassiat, Martin, Stemper (2017).
+Bayer, Friz, Gassiat, Martin, Stemper (2017). A regularity structure for finance.
 
 ## Requirements:
 
