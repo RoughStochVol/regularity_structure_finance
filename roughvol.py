@@ -2,13 +2,20 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------------------------------------------------------
-# ROUGH VOL FRAMEWORK
+# AUXILIARY CODE
+#
+# Paper: A regularity structure for rough volatility.
+# Authors: C. Bayer, P. K. Friz, P. Gassiat, J. Martin, B. Stemper (2017).
+# Maintainer: B. Stemper (stemper@math.tu-berlin.de)
 
 # ------------------------------------------------------------------------------
 # IMPORTS
 
+# Standard library packages.
 import numpy as np
 from math import sqrt, log, e, pi, isnan
+
+# Custom module.
 import blackscholes as BS
     
 # ------------------------------------------------------------------------------
@@ -162,6 +169,9 @@ class IV:
         :param normals: iid normals
         :type normals: numpy array of dim (nb_samples, # Haar-terms)
 
+        Output
+        ------
+
         :return: Monte Carlo samples of approximations to $I$
         :rtype: numpy array of dim (nb_samples,)
 
@@ -196,14 +206,12 @@ class IV:
 
         del(fbm_values)
 
-        # renormalisation = np.tile(self.renormalisation, (nb_samples,1))
+        renormalisation = np.tile(self.renormalisation, (nb_samples,1))
 
-        # integrand = fprime_values * renormalisation
-
-        integrand = self.const_renorm * fprime_values
+        integrand = fprime_values * renormalisation
 
         del(fprime_values)
-        # del(renormalisation)
+        del(renormalisation)
 
         int2 = np.trapz(integrand, self.discgrid, axis=1)
 
@@ -224,8 +232,11 @@ class IV:
         Input
         -----
 
-        :param normals: iid normals
+        :param normals: iid standard normals
         :type normals: numpy array of dim (nb_samples, # Haar-terms)
+
+        Output
+        ------
 
         :return: Monte Carlo samples of approximations to $I$
         :rtype: numpy array of dim (nb_samples,)
@@ -287,15 +298,11 @@ class IV:
 # ------------------------------------------------------------------------------
 # DEFINITIONS
 
-class Pricer:
+class pricer:
     """
-    Computes the price of a European call option under a rough volatility model 
-    of the form
+    European call option pricer under rough volatility.
 
-    !!INSERT!!
-
-    *NOTE* 
-    For convenenience, 'time_to_maturity' and 'risk-free rate' have been fixed
+    Recall 'time_to_maturity' and 'risk-free rate' have been fixed
     to $T=1$ and $r=0$ respectively (as discussed in paper).
 
     Parameters
@@ -347,8 +354,24 @@ class Pricer:
 
     def compute(self, nb_paths, normals=None):
         """
+        Computes the price of a European call option under a rough 
+        volatility model as proposed in paper.
+
+        Input
+        -----
+
+        :param nb_paths: # of Monte Carlo simulations to run
+        :param normals: iid standard normals
+
+        :type nb_paths: int
+        :type normals: numpy array of dim (nb_paths, 2**self.N)
+
+
+        Output
+        ------
+
         :return: prices
-        :rtype: numpy array
+        :rtype: numpy array of dim (nb_paths,)
 
         :return: mean
         :rtype: float
