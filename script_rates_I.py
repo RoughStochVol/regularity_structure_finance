@@ -37,7 +37,7 @@ sim_id = 1
 parameters = {
     "hurst_index": 0.4,
     "time_steps": 2**17,
-    "mc_runs": 10**2,
+    "mc_runs": 10**5,
     "max_haar_level": 8,
     "nb_batches": 10,
     "f0": "lambda x: np.exp(x)",
@@ -158,11 +158,11 @@ sns.set_palette("husl")
 # Create matplotlib figure & axes objects with specified information etc.
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
-ax.set_title('Strong and weak error: non-constant renormalization')
+ax.set_title('Strong error: non-constant renormalization')
 ax.set_xlabel('$\epsilon = 2^{-N}$')
 ax.set_ylabel('Error')
-ax.set_xlim([10**(-2), 10])
-ax.set_ylim([10**(-2), 10])
+ax.set_xlim([10**(-2), 10**0.5])
+ax.set_ylim([10**(-1), 10**0])
 ax.set_xscale("log", nonposx='clip')
 ax.set_yscale("log", nonposy='clip')
 
@@ -195,45 +195,51 @@ for nb, idx in enumerate(IDs):
     offset_strong = 1.96 * std_strong
 
     # Estimate through Least squares the strong rate.
-    str_sl, str_intcpt = ls(np.log(eps),
-                            np.log(np.sqrt(M2_diff_strong)))[0:2]
+    str_sl, str_intcpt, _, _, str_std = ls(np.log(eps), 
+                                           np.log(np.sqrt(M2_diff_strong)))
 
     # Estimate through Least squares the weak rate.
-    w_sl, w_intcpt = ls(np.log(eps), np.log(weak_abs_diff))[0:2]
+    w_sl, w_intcpt, _, _, w_std = ls(np.log(eps), np.log(weak_abs_diff))
 
     # Construct LS regression line.
     fitted_line_str = np.exp(str_intcpt + str_sl * np.log(eps))
     fitted_line_weak = np.exp(w_intcpt + w_sl * np.log(eps))
 
     # Plot the weak error estimates and the confidence band.
-    ax.plot(eps, weak_abs_diff, color=colors[nb], linestyle='', marker='+',
-            label='H = %.1f, weak error, rate $\\approx$ %.2f ' % (hursts[nb],
-            w_sl), markersize=6, mew=1)
+    # ax.plot(eps, weak_abs_diff, color=colors[nb], linestyle='', marker='+',
+    #         label='H = %.1f, weak rate $\\approx$ %.2f' % (hursts[nb],
+    #         w_sl), markersize=6, mew=1)
 
-    ax.fill_between(eps, weak_abs_diff-offset_weak,
-                    weak_abs_diff + offset_weak, alpha=0.1,
-                    facecolor=colors[nb], antialiased=True)
+    # ax.fill_between(eps, weak_abs_diff-offset_weak,
+    #                 weak_abs_diff + offset_weak, alpha=0.1,
+    #                 facecolor=colors[nb], antialiased=True)
 
-    ax.plot(eps, fitted_line_weak, color=colors[nb], linestyle='--',
-            linewidth=0.8)
+    # ax.plot(eps, fitted_line_weak, color=colors[nb], linestyle='--',
+    #         linewidth=0.8)
 
     # Plot the strong error estimates and the confidence band.
     ax.plot(eps, np.sqrt(M2_diff_strong), color=colors[nb], linestyle='',
             mew=1, marker='x', markersize=6,
-            label='H = %.1f, strong error, rate $\\approx$ %.2f' % (hursts[nb],
+            label='H = %.1f: strong rate $\\approx$ %.2f' % (hursts[nb],
             str_sl))
 
     ax.fill_between(eps, np.sqrt(M2_diff_strong) - np.sqrt(offset_strong),
                     np.sqrt(M2_diff_strong) + np.sqrt(offset_strong),
                     alpha=0.3, facecolor=colors[nb], antialiased=True)
 
-    ax.plot(eps, fitted_line_str, colors[nb], linewidth=0.8, linestyle='--')
+    ax.plot(eps, fitted_line_str, colors[nb], linewidth=0.8, linestyle='-')
+
+    # Plot reference lines for rates.
+    ax.plot(eps, np.exp(str_intcpt + hursts[nb] * np.log(eps)), color=colors[nb], 
+                            linewidth=0.8, linestyle='--', 
+                            label='Reference rate %.1f' % hursts[nb])
+
 
 ax.legend(loc='lower right', frameon=True)
 
 # Exporting image to PDF.
 # fig.savefig("%i_I_bothrates.pdf" % idx, bbox_inches='tight', dpi=500)
-fig.savefig("test.pdf", bbox_inches='tight', dpi=500)
+fig.savefig("pub_strong_constant.pdf", bbox_inches='tight', dpi=500)
 
 print("Image saved. Complete.")
 
